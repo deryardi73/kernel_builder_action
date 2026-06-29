@@ -1,9 +1,9 @@
 #CONFIGURATION
-kernelsource=https://github.com/xxblebleblexx/moonbeam_gale_kernel.git # Must be edited
+kernelsource=https://github.com/deryardi73/android_kernel_xiaomi_fire.git # Must be edited
 kernelname=$(basename "$kernelsource" .git) # No need to edit
-branch_kernel=moonbeam # Must be edited
-defconfig_path=arch/arm64/configs/gale_defconfig # Must be edited
-defconfig=gale_defconfig # Must be edited
+branch_kernel=inferno-proto2 # Must be edited
+defconfig_path=arch/arm64/configs/fire_defconfig # Must be edited
+defconfig=fire_defconfig # Must be edited
 fast_path=$GITHUB_WORKSPACE # This where kernelsource saved
 hooks=manual #only manual hook/kprobes hook, must be edited
 
@@ -12,7 +12,7 @@ git clone -b $branch_kernel --depth=1 $kernelsource;wait
 cd $fast_path/$kernelname
 
 #KSU DRIVER
-curl -LSs "https://raw.githubusercontent.com/xxblebleblexx/MultiSU/refs/heads/legacy/kernel/setup.sh" | bash -s legacy
+curl -LSs "https://raw.githubusercontent.com/backslashxx/KernelSU/refs/heads/master/kernel/setup.sh" | bash -s master
 
 #KSU ACTIVATION
 echo "CONFIG_KSU=y" >> $defconfig_path
