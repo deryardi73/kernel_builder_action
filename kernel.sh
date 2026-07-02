@@ -1,7 +1,7 @@
 #CONFIGURATION
 kernelsource=https://github.com/deryardi73/android_kernel_xiaomi_fire.git # Must be edited
 kernelname=$(basename "$kernelsource" .git) # No need to edit
-branch_kernel=inferno-proto # Must be edited
+branch_kernel=inferno_mglru # Must be edited
 defconfig_path=arch/arm64/configs/fire_defconfig # Must be edited
 defconfig=fire_defconfig # Must be edited
 fast_path=$GITHUB_WORKSPACE # This where kernelsource saved
@@ -10,6 +10,13 @@ hooks=manual #only manual hook/kprobes hook, must be edited
 cd $fast_path
 git clone -b $branch_kernel --depth=1 $kernelsource;wait
 cd $fast_path/$kernelname
+
+#NoMount
+git clone --branch master --depth=1 https://github.com/maxsteeel/nomount.git
+cp nomount/kernel/src/nomount.c fs/
+cp nomount/kernel/src/nomount.h fs/
+patch -p1 < nomount/kernel/patches/nomount_4.19_kernel_integration.patch
+echo "CONFIG_NOMOUNT=y" >> $defconfig_path
 
 #KSU DRIVER
 curl -LSs "https://raw.githubusercontent.com/backslashxx/KernelSU/refs/heads/master/kernel/setup.sh" | bash -s master
