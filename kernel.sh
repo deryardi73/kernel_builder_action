@@ -1,7 +1,7 @@
 #CONFIGURATION
 kernelsource=https://github.com/deryardi73/android_kernel_xiaomi_fire.git # Must be edited
 kernelname=$(basename "$kernelsource" .git) # No need to edit
-branch_kernel=experiment # Must be edited
+branch_kernel=inferno_mglru_proto # Must be edited
 defconfig_path=arch/arm64/configs/fire_defconfig # Must be edited
 defconfig=fire_defconfig # Must be edited
 fast_path=$GITHUB_WORKSPACE # This where kernelsource saved
