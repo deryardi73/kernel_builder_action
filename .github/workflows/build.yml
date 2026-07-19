@@ -35,7 +35,6 @@ jobs:
           
       - name: Run Build Script
         run: |
-          wget https://raw.githubusercontent.com/xxblebleblexx/kernel_builder_action/refs/heads/$GITHUB_REF_NAME/kernel.sh
           chmod +x kernel.sh
           sh kernel.sh
 
