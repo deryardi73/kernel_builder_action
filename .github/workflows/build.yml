@@ -59,3 +59,15 @@ jobs:
         with:
           name: image
           path: dir_image/
+
+      - name: Prepare Module.symvers
+        run: |
+          mkdir -p dir_symvers
+          find . -type f -name "Module.symvers" -exec cp --parents {} dir_symvers/ \;
+          ls -la dir_symvers/
+
+      - name: Upload Module.symvers
+        uses: actions/upload-artifact@v4
+        with:
+          name: module-symvers
+          path: dir_symvers/
