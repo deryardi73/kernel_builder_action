@@ -1,7 +1,7 @@
 #HEAD_CONFIGURATION
 kernelsource=https://android.googlesource.com/kernel/manifest # No need to edit
 kernelname=Galactic #Must be edited
-branch_kernel=common-android15-6.6 # Must be edited
+branch_kernel=common-android15-6.6.30 # Must be edited
 defconfig_path=arch/arm64/configs/gki_defconfig # No need to edit
 defconfig=gki_defconfig # No need to edit
 fast_path=$GITHUB_WORKSPACE/gki # This where kernelsource saved
