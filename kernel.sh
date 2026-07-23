@@ -13,6 +13,10 @@ link_ur_kernel=https://github.com/deryardi73/kernel_common.git #Must be edited
 branch_ur_kernel=android15-6.6.30 #Must be edited
 #ksu option
 use_ksu=n
+#BORESched
+use_bore=y
+#le9uo
+use_le9uo=y
 #END_CONFIGURATION
 
 mkdir -p gki
@@ -33,6 +37,15 @@ curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/ke
 echo "CONFIG_KSU=y" >> $defconfig_path
 #verification ksu
 cat $defconfig_path | grep CONFIG_KSU=y
+fi
+
+if [ "$use_bore" = "y" ]; then
+git apply $GITHUB_WORKSPACE/bore_sched.patch
+echo "CONFIG_SCHED_BORE=y" >> $defconfig_path
+fi
+
+if [ "$use_le9uo" = "y" ]; then
+git apply $GITHUB_WORKSPACE/le9uo.patch
 fi
 
 if [ "$use_own_kernel" = "n" ]; then
