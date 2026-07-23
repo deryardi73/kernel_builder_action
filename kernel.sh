@@ -11,6 +11,8 @@ compile_type=${helper%%-*} # No need to edit
 use_own_kernel=y # y/n 
 link_ur_kernel=https://github.com/deryardi73/kernel_common.git #Must be edited
 branch_ur_kernel=android15-6.6 #Must be edited
+#ksu option
+use_ksu=n
 #END_CONFIGURATION
 
 mkdir -p gki
@@ -24,19 +26,20 @@ git clone -b $branch_ur_kernel --depth=1 $link_ur_kernel common ;wait
 fi
 
 cd common
+if [ "$use_ksu" = "y" ]; then
 #KSU DRIVER
 curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s stable;wait
 #KSU ACTIVATION
 echo "CONFIG_KSU=y" >> $defconfig_path
 #verification ksu
 cat $defconfig_path | grep CONFIG_KSU=y
+fi
 
 if [ "$use_own_kernel" = "n" ]; then
 #Set name for linux kernel
 echo "CONFIG_LOCALVERSION=\"-$kernelname-stable\"" >> $defconfig_path
 fi
 
-echo "CONFIG_LOCALVERSION_AUTO=n" >> $defconfig_path
 #disable post_defconfig
 sed -i 's/POST_DEFCONFIG_CMDS="check_defconfig"/POST_DEFCONFIG_CMDS=""/g' build.config.gki
 #disable abi export protection
