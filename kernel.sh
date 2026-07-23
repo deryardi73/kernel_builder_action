@@ -16,7 +16,7 @@ use_ksu=n
 #BORESched
 use_bore=y
 #le9uo
-use_le9uo=y
+use_le9uo=n
 #END_CONFIGURATION
 
 mkdir -p gki
@@ -40,7 +40,8 @@ cat $defconfig_path | grep CONFIG_KSU=y
 fi
 
 if [ "$use_bore" = "y" ]; then
-git apply $GITHUB_WORKSPACE/bore_sched.patch
+sed -i 's/\r$//' "$GITHUB_WORKSPACE/bore_sched.patch"
+git apply "$GITHUB_WORKSPACE/bore_sched.patch"
 echo "CONFIG_SCHED_BORE=y" >> $defconfig_path
 fi
 
