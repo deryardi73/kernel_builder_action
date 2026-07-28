@@ -4,9 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       kernel_version:
-        description: 'Kernel version'
+        description: 'Full kernel version (must match a folder in firelzrd/bore-scheduler patches/stable/)'
         default: '6.12.96'
         required: true
+      bore_branch_dir:
+        description: 'BORE patch folder name (e.g. linux-6.12-bore)'
+        default: 'linux-6.12-bore'
+        required: true
+      enable_lto:
+        description: 'Enable Thin LTO (slower build, needs more RAM)'
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -14,40 +22,106 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Free up disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo apt-get clean
+
       - name: Install build deps
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libncurses-dev flex bison \
             openssl libssl-dev dkms libelf-dev libudev-dev libpci-dev \
-            libiberty-dev autoconf bc rsync kmod cpio
+            libiberty-dev autoconf bc rsync kmod cpio zstd ccache
+
+      - name: Setup ccache
+        run: |
+          mkdir -p ~/.ccache
+          echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
+          ccache -M 4G
+
+      - name: Cache ccache dir
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-bore-${{ github.event.inputs.kernel_version }}-${{ github.run_id }}
+          restore-keys: |
+            ccache-bore-${{ github.event.inputs.kernel_version }}-
 
       - name: Download kernel source
         run: |
           KVER="${{ github.event.inputs.kernel_version }}"
-          KMAJOR=$(echo $KVER | cut -d. -f1)
-          wget https://cdn.kernel.org/pub/linux/kernel/v${KMAJOR}.x/linux-${KVER}.tar.xz
-          tar xf linux-${KVER}.tar.xz
-          mv linux-${KVER} linux-src
+          KMAJOR=$(echo "$KVER" | cut -d. -f1)
+          wget -q "https://cdn.kernel.org/pub/linux/kernel/v${KMAJOR}.x/linux-${KVER}.tar.xz"
+          tar xf "linux-${KVER}.tar.xz"
+          mv "linux-${KVER}" linux-src
 
-      - name: Fetch BORE patch
+      - name: Fetch official firelzrd BORE patches
+        run: |
+          BORE_DIR="${{ github.event.inputs.bore_branch_dir }}"
+          BASE_URL="https://raw.githubusercontent.com/firelzrd/bore-scheduler/main/patches/stable/${BORE_DIR}"
+
+          # discover patch filenames from the GitHub API (falls back to codeload tarball if rate-limited)
+          curl -s "https://api.github.com/repos/firelzrd/bore-scheduler/contents/patches/stable/${BORE_DIR}" \
+            | grep -o '"name": *"[^"]*\.patch"' | sed 's/"name": *"//;s/"$//' > patch_list.txt
+
+          if [ ! -s patch_list.txt ]; then
+            echo "API listing failed (rate limit?), falling back to full repo tarball"
+            curl -sL -o bore-repo.tar.gz https://codeload.github.com/firelzrd/bore-scheduler/tar.gz/refs/heads/main
+            tar xzf bore-repo.tar.gz "bore-scheduler-main/patches/stable/${BORE_DIR}/"
+            cp "bore-scheduler-main/patches/stable/${BORE_DIR}"/*.patch linux-src/
+          else
+            cd linux-src
+            while read -r fname; do
+              wget -q "${BASE_URL}/${fname}"
+            done < ../patch_list.txt
+            cd ..
+          fi
+
+          # strip any CRLF corruption
+          cd linux-src
+          for f in *.patch; do sed -i 's/\r$//' "$f"; done
+          ls -la *.patch
+
+      - name: Apply BORE patches
         run: |
           cd linux-src
-          wget https://raw.githubusercontent.com/cachyos/kernel-patches/master/6.12/sched/0001-bore-cachy.patch
-          sed -i 's/\r$//' 0001-bore-cachy.patch
+          for p in $(ls *.patch | sort); do
+            echo "=== Applying $p ==="
+            patch -p1 --dry-run < "$p"
+            patch -p1 < "$p"
+          done
 
-      - name: Apply BORE patch
-        run: |
-          cd linux-src
-          patch -p1 --dry-run < 0001-bore-cachy.patch
-          patch -p1 < 0001-bore-cachy.patch
+      - name: Upload reject files if patch failed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: patch-rejects
+          path: |
+            linux-src/**/*.rej
+            linux-src/**/*.orig
 
       - name: Configure kernel
         run: |
           cd linux-src
-          make defconfig
+          # start from Debian's running config if present in repo, else defconfig
+          if [ -f ../configs/debian-${{ github.event.inputs.kernel_version }}.config ]; then
+            cp ../configs/debian-${{ github.event.inputs.kernel_version }}.config .config
+          else
+            make defconfig
+          fi
+
           ./scripts/config --enable CONFIG_SCHED_BORE
           ./scripts/config --disable CONFIG_DEBUG_INFO
           ./scripts/config --disable CONFIG_DEBUG_INFO_DWARF5
+
+          if [ "${{ github.event.inputs.enable_lto }}" = "true" ]; then
+            ./scripts/config --enable CONFIG_LTO_CLANG_THIN
+          else
+            ./scripts/config --disable CONFIG_LTO_CLANG_THIN
+            ./scripts/config --disable CONFIG_LTO_CLANG_FULL
+          fi
+
           make olddefconfig
 
       - name: Build kernel deb packages
@@ -55,10 +129,31 @@ jobs:
           cd linux-src
           make -j$(nproc) bindeb-pkg LOCALVERSION=-bore
 
-      - name: Upload artifacts
+      - name: Upload kernel debs
         uses: actions/upload-artifact@v4
         with:
-          name: bore-kernel-debs
+          name: bore-kernel-${{ github.event.inputs.kernel_version }}-debs
           path: |
-            *.deb
-          retention-days: 14
+            linux-image-*.deb
+            linux-headers-*.deb
+          retention-days: 30
+
+      - name: Create GitHub Release with debs
+        if: success()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: bore-${{ github.event.inputs.kernel_version }}-${{ github.run_number }}
+          name: BORE kernel ${{ github.event.inputs.kernel_version }} (build ${{ github.run_number }})
+          files: |
+            linux-image-*.deb
+            linux-headers-*.deb
+          body: |
+            Debian kernel ${{ github.event.inputs.kernel_version }} with CONFIG_SCHED_BORE enabled
+            (official firelzrd/bore-scheduler patch, folder: ${{ github.event.inputs.bore_branch_dir }}).
+
+            Install:
+            ```
+            sudo dpkg -i linux-image-*-bore*.deb linux-headers-*-bore*.deb
+            sudo update-grub
+            sudo reboot
+            ```
