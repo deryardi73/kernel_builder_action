@@ -1,62 +1,64 @@
-name: Build Kernel
+name: Build BORE Kernel
 
 on:
   workflow_dispatch:
+    inputs:
+      kernel_version:
+        description: 'Kernel version'
+        default: '6.12.96'
+        required: true
 
 jobs:
   build:
     runs-on: ubuntu-24.04
-
-    permissions:
-      contents: write
-
     steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Check Disk Space
-        run: df -h
-        
-      - name: Install Dependencies
+      - name: Install build deps
         run: |
-          sudo apt update -y
-          sudo apt install -y make patch curl git llvm lld build-essential \
-            libncurses-dev libssl-dev bc flex bison rsync kmod cpio python3 \
-            gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu ccache
-          mkdir -p $HOME/bin
-          curl https://storage.googleapis.com/git-repo-downloads/repo > $HOME/bin/repo
-          chmod a+x $HOME/bin/repo
-          echo "$HOME/bin" >> $GITHUB_PATH
+          sudo apt-get update
+          sudo apt-get install -y build-essential libncurses-dev flex bison \
+            openssl libssl-dev dkms libelf-dev libudev-dev libpci-dev \
+            libiberty-dev autoconf bc rsync kmod cpio
 
-          git config --global user.name "runner"
-          git config --global user.email "runner@kernel.local"
-          git config --global color.ui false
-          git config --global --add safe.directory '*'
-          
-      - name: Run Build Script
+      - name: Download kernel source
         run: |
-          wget https://raw.githubusercontent.com/xxblebleblexx/kernel_builder_action/refs/heads/$GITHUB_REF_NAME/kernel.sh
-          chmod +x kernel.sh
-          sh kernel.sh
+          KVER="${{ github.event.inputs.kernel_version }}"
+          KMAJOR=$(echo $KVER | cut -d. -f1)
+          wget https://cdn.kernel.org/pub/linux/kernel/v${KMAJOR}.x/linux-${KVER}.tar.xz
+          tar xf linux-${KVER}.tar.xz
+          mv linux-${KVER} linux-src
 
-      - name: Prepare image.gz
+      - name: Fetch BORE patch
         run: |
-          mkdir -p dir_image_gz
-          find . -type f \( -name "image.gz" -o -name "Image.gz" \) -exec cp {} dir_image_gz/ \;
-      
-      - name: Upload image.gz
+          cd linux-src
+          wget https://raw.githubusercontent.com/cachyos/kernel-patches/master/6.12/sched/0001-bore-cachy.patch
+          sed -i 's/\r$//' 0001-bore-cachy.patch
+
+      - name: Apply BORE patch
+        run: |
+          cd linux-src
+          patch -p1 --dry-run < 0001-bore-cachy.patch
+          patch -p1 < 0001-bore-cachy.patch
+
+      - name: Configure kernel
+        run: |
+          cd linux-src
+          make defconfig
+          ./scripts/config --enable CONFIG_SCHED_BORE
+          ./scripts/config --disable CONFIG_DEBUG_INFO
+          ./scripts/config --disable CONFIG_DEBUG_INFO_DWARF5
+          make olddefconfig
+
+      - name: Build kernel deb packages
+        run: |
+          cd linux-src
+          make -j$(nproc) bindeb-pkg LOCALVERSION=-bore
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: image-gz
-          path: dir_image_gz/
-
-      - name: Prepare Image
-        run: |
-          mkdir -p dir_image
-          find . -type f -name "Image" -exec cp {} dir_image/ \;
-      
-      - name: Upload Image
-        uses: actions/upload-artifact@v4
-        with:
-          name: image
-          path: dir_image/
+          name: bore-kernel-debs
+          path: |
+            *.deb
+          retention-days: 14
