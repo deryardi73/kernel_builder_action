@@ -12,7 +12,7 @@ git clone -b $branch_kernel --depth=1 $kernelsource;wait
 cd $fast_path/$kernelname
 
 #KSU DRIVER
-curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s stable
+curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s legacy
 
 #KSU ACTIVATION
 echo "CONFIG_KSU=y" >> $defconfig_path
