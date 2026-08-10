@@ -6,6 +6,7 @@ defconfig_path=arch/arm64/configs/fire_defconfig # Must be edited
 defconfig=fire_defconfig # Must be edited
 fast_path=$GITHUB_WORKSPACE # This where kernelsource saved
 hooks=manual #only manual hook/kprobes hook, must be edited
+susfs=y
 
 cd $fast_path
 git clone -b $branch_kernel --depth=1 $kernelsource;wait
@@ -28,6 +29,19 @@ if [ "$hooks" = "manual" ]; then
 #MANUAL HOOK
 echo "CONFIG_KSU_MANUAL_HOOK=y" >> $defconfig_path
 wget https://raw.githubusercontent.com/deryardi73/manual_hook/refs/heads/main/manualhook_1.6_fixed.patch;wait;patch -p1 < manualhook_1.6_fixed.patch
+fi
+
+if [ "$susfs" = "y" ]; then
+echo "CONFIG_KSU_SUSFS=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_SUS_PATH=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_SUS_MOUNT=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_SUS_KSTAT=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_SUS_MAP=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_SPOOF_UNAME=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_ENABLE_LOG=y" >> $defconfig_path
+wget https://raw.githubusercontent.com/deryardi73/NonGKI_Kernel_Build_2nd/refs/heads/mainline/Patches/Patch/susfs_patch_to_4.19.patch;wait;patch -p1 < susfs_patch_to_4.19.patch
 fi
 
 make O=out ARCH=arm64 $defconfig; printf "Y\n2\n\n\n\nY\n" | make -j$(nproc --all) CC=clang O=out ARCH=arm64 LLVM=1 LLVM_IAS=1 LD=ld.lld AS=llvm-as AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu-
