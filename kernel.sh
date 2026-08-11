@@ -39,4 +39,26 @@ echo "CONFIG_KSU_MANUAL_HOOK=y" >> $defconfig_path
 wget https://raw.githubusercontent.com/deryardi73/manual_hook/refs/heads/main/manualhook_1.6_fixed.patch;wait;patch -p1 < manualhook_1.6_fixed.patch
 fi
 
+if ! grep -q susfs_kstat_hook fs/stat.c; then
+sed -i '/^void generic_fillattr(struct inode \*inode, struct kstat \*stat)/,/^}/{
+/stat->attributes |= STATX_ATTR_AUTOMOUNT;/a\
+#ifdef CONFIG_KSU\
+\textern void (*susfs_kstat_hook)(struct inode *inode, struct kstat *stat);\
+\tif (unlikely(susfs_kstat_hook))\
+\t\tsusfs_kstat_hook(inode, stat);\
+#endif
+}' fs/stat.c
+fi
+
+if ! grep -q susfs_uname_hook kernel/sys.c; then
+sed -i '/^SYSCALL_DEFINE1(newuname, struct new_utsname __user \*, name)/,/^}/{
+/^\tup_read(&uts_sem);/a\
+#ifdef CONFIG_KSU\
+\textern void (*susfs_uname_hook)(struct new_utsname *tmp);\
+\tif (unlikely(susfs_uname_hook))\
+\t\tsusfs_uname_hook(&tmp);\
+#endif
+}' kernel/sys.c
+fi
+
 make O=out ARCH=arm64 $defconfig; printf "Y\n2\n\n\n\nY\n" | make -j$(nproc --all) CC=clang O=out ARCH=arm64 LLVM=1 LLVM_IAS=1 LD=ld.lld AS=llvm-as AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu-
