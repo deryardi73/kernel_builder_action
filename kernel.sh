@@ -10,13 +10,6 @@ cd $fast_path
 git clone -b $branch_kernel --depth=1 $kernelsource;wait
 cd $fast_path/$kernelname
 
-#NoMount
-git clone --branch master --depth=1 https://github.com/maxsteeel/nomount.git
-cp nomount/kernel/src/nomount.c fs/
-cp nomount/kernel/src/nomount.h fs/
-patch -p1 < nomount/kernel/patches/nomount_4.19_kernel_integration.patch
-echo "CONFIG_NOMOUNT=y" >> $defconfig_path
-
 #KSU DRIVER
 curl -LSs "https://raw.githubusercontent.com/backslashxx/KernelSU/refs/heads/master/kernel/setup.sh" | bash -s master
 
