@@ -10,11 +10,11 @@ compile_type=${helper%%-*} # No need to edit
  #USE OWN SOURCE KERNEL
 use_own_kernel=y # y/n 
 link_ur_kernel=https://github.com/deryardi73/kernel_common.git #Must be edited
-branch_ur_kernel=android15-6.6.30 #Must be edited
+branch_ur_kernel=6.6 #Must be edited
 #ksu option
-use_ksu=n
+use_ksu=y
 #BORESched
-use_bore=y
+use_bore=n
 #le9uo
 use_le9uo=n
 #END_CONFIGURATION
