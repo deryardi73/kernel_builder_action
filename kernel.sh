@@ -2,22 +2,17 @@
 kernelsource=https://android.googlesource.com/kernel/manifest # No need to edit
 kernelname=Galactic #Must be edited
 branch_kernel=common-android15-6.6 # Must be edited
-defconfig_path=arch/arm64/configs/gki_defconfig # No need to edit
-defconfig=gki_defconfig # No need to edit
+defconfig_path=arch/arm64/configs/new_defconfig # No need to edit
+defconfig=new_defconfig # No need to edit
 fast_path=$GITHUB_WORKSPACE/gki # This where kernelsource saved
 helper=${branch_kernel#*-} # No need to edit
 compile_type=${helper%%-*} # No need to edit
  #USE OWN SOURCE KERNEL
 use_own_kernel=y # y/n 
 link_ur_kernel=https://github.com/deryardi73/kernel_common.git #Must be edited
-branch_ur_kernel=6.6.89 #Must be edited
+branch_ur_kernel=6.6.58 #Must be edited
 #ksu option
 use_ksu=y
-#BORESched
-use_bore=n
-#le9uo
-use_le9uo=n
-#END_CONFIGURATION
 
 mkdir -p gki
 cd $fast_path
@@ -37,16 +32,6 @@ curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/ke
 echo "CONFIG_KSU=y" >> $defconfig_path
 #verification ksu
 cat $defconfig_path | grep CONFIG_KSU=y
-fi
-
-if [ "$use_bore" = "y" ]; then
-sed -i 's/\r$//' "$GITHUB_WORKSPACE/bore_sched.patch"
-git apply "$GITHUB_WORKSPACE/bore_sched.patch"
-echo "CONFIG_SCHED_BORE=y" >> $defconfig_path
-fi
-
-if [ "$use_le9uo" = "y" ]; then
-git apply $GITHUB_WORKSPACE/le9uo.patch
 fi
 
 if [ "$use_own_kernel" = "n" ]; then
