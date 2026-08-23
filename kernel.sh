@@ -41,6 +41,10 @@ fi
 
 #disable post_defconfig
 sed -i 's/POST_DEFCONFIG_CMDS="check_defconfig"/POST_DEFCONFIG_CMDS=""/g' build.config.gki
+#point the actual Bazel build at our defconfig instead of the stock gki_defconfig
+sed -i "s/^DEFCONFIG=.*/DEFCONFIG=$defconfig/" build.config.gki
+#verification defconfig actually wired
+grep "^DEFCONFIG=" build.config.gki
 #disable abi export protection
 sed -i 'd' android/abi_gki_protected_exports_aarch64
 #Compile
