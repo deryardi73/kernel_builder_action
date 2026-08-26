@@ -10,7 +10,7 @@ compile_type=${helper%%-*} # No need to edit
  #USE OWN SOURCE KERNEL
 use_own_kernel=y # y/n 
 link_ur_kernel=https://github.com/deryardi73/kernel_common.git #Must be edited
-branch_ur_kernel=6.6-lts #Must be edited
+branch_ur_kernel=6.6.58 #Must be edited
 #ksu option
 use_ksu=y
 
@@ -27,7 +27,7 @@ fi
 cd common
 if [ "$use_ksu" = "y" ]; then
 #KSU DRIVER
-curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s stable;wait
+curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash;wait
 #KSU ACTIVATION
 echo "CONFIG_KSU=y" >> $defconfig_path
 #verification ksu
