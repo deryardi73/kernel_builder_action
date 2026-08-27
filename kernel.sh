@@ -54,7 +54,7 @@ cd $fast_path
 
 case "$compile_type" in
     android13|android14|android15|android16)
-        ./tools/bazel build --config=fast --nokmi_symbol_list_strict_mode //common:kernel_aarch64_dist
+        ./tools/bazel build --config=fast --config=stamp --nokmi_symbol_list_strict_mode //common:kernel_aarch64_dist
         ;;
     android12)
         LTO=thin BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh
