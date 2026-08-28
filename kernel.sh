@@ -47,6 +47,11 @@ sed -i "s/^DEFCONFIG=.*/DEFCONFIG=$defconfig/" build.config.gki
 grep "^DEFCONFIG=" build.config.gki
 #disable abi export protection
 sed -i 'd' android/abi_gki_protected_exports_aarch64
+
+git add -A
+git -c user.name="kernel.sh CI" -c user.email="ci@localhost" \
+	commit -q -m "ci: bake in KSU + defconfig + build.config tweaks" || true
+
 #Compile
 cd ../
 
