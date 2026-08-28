@@ -48,6 +48,14 @@ grep "^DEFCONFIG=" build.config.gki
 #disable abi export protection
 sed -i 'd' android/abi_gki_protected_exports_aarch64
 
+#commit CI-generated changes so Kleaf's --config=stamp dirty check
+#(git status on the real tree, independent of scripts/setlocalversion)
+#doesn't see KSU/defconfig/build.config as uncommitted and tag -dirty
+#
+#strip nested .git dirs first (KernelSU's setup.sh does a real git
+#clone into the tree) so their content gets tracked as normal files
+#in this repo instead of being swallowed as a dangling gitlink
+find . -mindepth 2 -name ".git" -exec rm -rf {} +
 git add -A
 git -c user.name="kernel.sh CI" -c user.email="ci@localhost" \
 	commit -q -m "ci: bake in KSU + defconfig + build.config tweaks" || true
