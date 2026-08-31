@@ -9,8 +9,8 @@ helper=${branch_kernel#*-} # No need to edit
 compile_type=${helper%%-*} # No need to edit
  #USE OWN SOURCE KERNEL
 use_own_kernel=y # y/n 
-link_ur_kernel=https://github.com/deryardi73/kernel_common.git #Must be edited
-branch_ur_kernel=6.6.58 #Must be edited
+link_ur_kernel=https://github.com/deryardi73/gki_kernel.git #Must be edited
+branch_ur_kernel=6.6-lts #Must be edited
 #ksu option
 use_ksu=y
 
@@ -48,14 +48,6 @@ grep "^DEFCONFIG=" build.config.gki
 #disable abi export protection
 sed -i 'd' android/abi_gki_protected_exports_aarch64
 
-#commit CI-generated changes so Kleaf's --config=stamp dirty check
-#(git status on the real tree, independent of scripts/setlocalversion)
-#doesn't see KSU/defconfig/build.config as uncommitted and tag -dirty
-#
-#strip nested .git dirs first (KernelSU's setup.sh does a real git
-#clone into the tree) so their content gets tracked as normal files
-#in this repo instead of being swallowed as a dangling gitlink
-find . -mindepth 2 -name ".git" -exec rm -rf {} +
 git add -A
 git -c user.name="kernel.sh CI" -c user.email="ci@localhost" \
 	commit -q -m "ci: bake in KSU + defconfig + build.config tweaks" || true
@@ -67,7 +59,7 @@ cd $fast_path
 
 case "$compile_type" in
     android13|android14|android15|android16)
-        ./tools/bazel build --config=fast --config=stamp --nokmi_symbol_list_strict_mode //common:kernel_aarch64_dist
+        ./tools/bazel build --config=fast --nokmi_symbol_list_strict_mode //common:kernel_aarch64_dist
         ;;
     android12)
         LTO=thin BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh
