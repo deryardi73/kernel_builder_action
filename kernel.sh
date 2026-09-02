@@ -3,7 +3,7 @@ kernelsource=https://github.com/mt6768-dev/android_kernel_xiaomi_mt6768.git # Mu
 kernelname=$(basename "$kernelsource" .git) # No need to edit
 branch_kernel=lineage-23.2 # Must be edited
 defconfig_path=arch/arm64/configs/vendor/lancelot_defconfig # Must be edited
-defconfig=lancelot_defconfig # Must be edited
+defconfig=vendor/lancelot_defconfig # Must be edited
 fast_path=$GITHUB_WORKSPACE # This where kernelsource saved
 
 cd $fast_path
