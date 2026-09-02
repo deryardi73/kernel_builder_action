@@ -1,9 +1,9 @@
 #CONFIGURATION
-kernelsource=https://github.com/deryardi73/android_kernel_xiaomi_fire.git # Must be edited
+kernelsource=https://github.com/mt6768-dev/android_kernel_xiaomi_mt6768.git # Must be edited
 kernelname=$(basename "$kernelsource" .git) # No need to edit
-branch_kernel=inferno2 # Must be edited
-defconfig_path=arch/arm64/configs/fire_defconfig # Must be edited
-defconfig=fire_defconfig # Must be edited
+branch_kernel=lineage-23.2 # Must be edited
+defconfig_path=arch/arm64/configs/vendor/lancelot_defconfig # Must be edited
+defconfig=lancelot_defconfig # Must be edited
 fast_path=$GITHUB_WORKSPACE # This where kernelsource saved
 
 cd $fast_path
