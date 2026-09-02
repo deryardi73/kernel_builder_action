@@ -22,7 +22,8 @@ jobs:
           sudo apt update -y
           sudo apt install -y make patch curl git llvm lld build-essential \
             libncurses-dev libssl-dev bc flex bison rsync kmod cpio python3 \
-            gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu ccache
+            gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu \
+            gcc-arm-linux-gnueabi ccache
 
       - name: Setup Clang
         run: |
