@@ -2,10 +2,39 @@ name: Build Kernel
 
 on:
   workflow_dispatch:
+    inputs:
+      device:
+        description: 'Device to build'
+        required: true
+        default: 'lancelot'
+        type: choice
+        options:
+          - lancelot
+          - merlin
+          - both
 
 jobs:
-  build:
+  setup:
     runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Determine device matrix
+        id: set-matrix
+        run: |
+          if [ "${{ github.event.inputs.device }}" = "both" ]; then
+            echo 'matrix=["lancelot","merlin"]' >> "$GITHUB_OUTPUT"
+          else
+            echo "matrix=[\"${{ github.event.inputs.device }}\"]" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: setup
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        device: ${{ fromJson(needs.setup.outputs.matrix) }}
 
     permissions:
       contents: write
@@ -16,7 +45,7 @@ jobs:
 
       - name: Check Disk Space
         run: df -h
-        
+
       - name: Install Dependencies
         run: |
           sudo apt update -y
@@ -34,8 +63,10 @@ jobs:
 
       - name: Verify Clang Version
         run: clang --version
-        
+
       - name: Run Build Script
+        env:
+          DEVICE: ${{ matrix.device }}
         run: |
           chmod +x kernel.sh
           sh kernel.sh
@@ -44,31 +75,31 @@ jobs:
         run: |
           mkdir -p dir_image_gz
           find . -type f \( -name "image.gz" -o -name "Image.gz" \) -exec cp {} dir_image_gz/ \;
-      
+
       - name: Upload image.gz
         uses: actions/upload-artifact@v4
         with:
-          name: image-gz
+          name: image-gz-${{ matrix.device }}
           path: dir_image_gz/
 
       - name: Prepare image.gz-dtb
         run: |
           mkdir -p dir_dtb
           find . -type f \( -name "image.gz-dtb" -o -name "Image.gz-dtb" \) -exec cp {} dir_dtb/ \;
-      
+
       - name: Upload image.gz-dtb
         uses: actions/upload-artifact@v4
         with:
-          name: image-gz-dtb
+          name: image-gz-dtb-${{ matrix.device }}
           path: dir_dtb/
 
       - name: Prepare Image
         run: |
           mkdir -p dir_image
           find . -type f -name "Image" -exec cp {} dir_image/ \;
-      
+
       - name: Upload Image
         uses: actions/upload-artifact@v4
         with:
-          name: image
+          name: image-${{ matrix.device }}
           path: dir_image/
