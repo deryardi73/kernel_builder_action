@@ -14,6 +14,11 @@ cd $fast_path/$kernelname
 curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash
 wget https://raw.githubusercontent.com/deryardi73/manual_hook/refs/heads/main/manualhook.patch;wait;patch -p1 < manualhook.patch
 
+#NOMOUNT
+curl https://raw.githubusercontent.com/maxsteeel/nomount/refs/heads/dev/kernel/setup.sh | bash -
+echo "CONFIG_NOMOUNT=y" >> $defconfig_path
+grep "CONFIG_NOMOUNT" $defconfig_path
+
 #KSU ACTIVATION
 echo "CONFIG_KSU=y" >> $defconfig_path
 echo "CONFIG_KSU_MANUAL_HOOK=y" >> $defconfig_path
