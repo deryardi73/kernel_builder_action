@@ -2,8 +2,8 @@
 kernelsource=https://android.googlesource.com/kernel/manifest # No need to edit
 kernelname=Galactic #Must be edited
 branch_kernel=common-android15-6.6 # Must be edited
-defconfig_path=arch/arm64/configs/new_defconfig # No need to edit
-defconfig=new_defconfig # No need to edit
+defconfig_path=arch/arm64/configs/fire_defconfig # No need to edit
+defconfig=fire_defconfig # No need to edit
 fast_path=$GITHUB_WORKSPACE/gki # This where kernelsource saved
 helper=${branch_kernel#*-} # No need to edit
 compile_type=${helper%%-*} # No need to edit
