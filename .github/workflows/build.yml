@@ -14,24 +14,6 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@v4
 
-      - name: Free Disk Space
-        run: |
-          echo "Before cleanup:"
-          df -h /
-
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo rm -rf /usr/local/.ghcup
-          sudo rm -rf /usr/local/share/boost
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          sudo docker image prune --all --force 2>/dev/null || true
-          sudo apt-get clean
-
-          echo "After cleanup:"
-          df -h /
-
       - name: Check Disk Space
         run: df -h
         
@@ -41,16 +23,17 @@ jobs:
           sudo apt install -y make patch curl git llvm lld build-essential \
             libncurses-dev libssl-dev bc flex bison rsync kmod cpio python3 \
             gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu ccache
-          mkdir -p $HOME/bin
-          curl https://storage.googleapis.com/git-repo-downloads/repo > $HOME/bin/repo
-          chmod a+x $HOME/bin/repo
-          echo "$HOME/bin" >> $GITHUB_PATH
 
-          git config --global user.name "runner"
-          git config --global user.email "runner@kernel.local"
-          git config --global color.ui false
-          git config --global --add safe.directory '*'
-          
+      - name: Setup Clang
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/clang"
+          wget -q https://github.com/ZyCromerZ/Clang/releases/download/12.0.1-20230207-release/Clang-12.0.1-20230207.tar.gz
+          tar -xzf Clang-12.0.1-20230207.tar.gz -C "$GITHUB_WORKSPACE/clang"
+          echo "$GITHUB_WORKSPACE/clang/bin" >> "$GITHUB_PATH"
+
+      - name: Verify Clang Version
+        run: clang --version
+        
       - name: Run Build Script
         run: |
           chmod +x kernel.sh
@@ -67,6 +50,17 @@ jobs:
           name: image-gz
           path: dir_image_gz/
 
+      - name: Prepare image.gz-dtb
+        run: |
+          mkdir -p dir_dtb
+          find . -type f \( -name "image.gz-dtb" -o -name "Image.gz-dtb" \) -exec cp {} dir_dtb/ \;
+      
+      - name: Upload image.gz-dtb
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-gz-dtb
+          path: dir_dtb/
+
       - name: Prepare Image
         run: |
           mkdir -p dir_image
@@ -77,15 +71,3 @@ jobs:
         with:
           name: image
           path: dir_image/
-
-      - name: Prepare Module.symvers
-        run: |
-          mkdir -p dir_symvers
-          find . -type f -name "Module.symvers" -exec cp --parents {} dir_symvers/ \;
-          ls -la dir_symvers/
-
-      - name: Upload Module.symvers
-        uses: actions/upload-artifact@v4
-        with:
-          name: module-symvers
-          path: dir_symvers/
