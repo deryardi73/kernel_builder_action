@@ -46,20 +46,5 @@ sed -i "s/^DEFCONFIG=.*/DEFCONFIG=$defconfig/" build.config.gki
 #verification defconfig actually wired
 grep "^DEFCONFIG=" build.config.gki
 
-git add -A
-git -c user.name="kernel.sh CI" -c user.email="ci@localhost" \
-	commit -q -m "ci: bake in KSU + defconfig + build.config tweaks" || true
-
 #Compile
-cd ../
-
-cd $fast_path
-
-case "$compile_type" in
-    android13|android14|android15|android16)
-        ./tools/bazel build --config=fast --config=stamp --nokmi_symbol_list_strict_mode //common:kernel_aarch64_dist
-        ;;
-    android12)
-        LTO=thin BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh
-        ;;
-esac
+make O=out ARCH=arm64 mrproper && make O=out ARCH=arm64 new_defconfig && make -j$(nproc --all) CC=clang O=out ARCH=arm64 LLVM=1 LLVM_IAS=1 LD=ld.lld AS=llvm-as AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu-
