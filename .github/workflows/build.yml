@@ -27,8 +27,8 @@ jobs:
       - name: Setup Clang
         run: |
           mkdir -p "$GITHUB_WORKSPACE/clang"
-          wget -q https://github.com/ZyCromerZ/Clang/releases/download/12.0.1-20230207-release/Clang-12.0.1-20230207.tar.gz
-          tar -xzf Clang-12.0.1-20230207.tar.gz -C "$GITHUB_WORKSPACE/clang"
+          wget -q https://github.com/Neutron-Toolchains/clang-build-catalogue/releases/download/26112022/neutron-clang-26112022.tar.zst
+          tar -zxvf neutron-clang-26112022.tar.zst -C "$GITHUB_WORKSPACE/clang"
           echo "$GITHUB_WORKSPACE/clang/bin" >> "$GITHUB_PATH"
 
       - name: Verify Clang Version
