@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir -p "$GITHUB_WORKSPACE/clang"
           wget -q https://github.com/Neutron-Toolchains/clang-build-catalogue/releases/download/26112022/neutron-clang-26112022.tar.zst
-          tar -zxvf neutron-clang-26112022.tar.zst -C "$GITHUB_WORKSPACE/clang"
+          tar -xf neutron-clang-26112022.tar.zst -C "$GITHUB_WORKSPACE/clang"
           echo "$GITHUB_WORKSPACE/clang/bin" >> "$GITHUB_PATH"
 
       - name: Verify Clang Version
