@@ -2,15 +2,15 @@
 kernelsource=https://android.googlesource.com/kernel/manifest # No need to edit
 kernelname=Galactic #Must be edited
 branch_kernel=common-android15-6.6 # Must be edited
-defconfig_path=arch/arm64/configs/fire_defconfig # No need to edit
-defconfig=fire_defconfig # No need to edit
+defconfig_path=arch/arm64/configs/new_defconfig # No need to edit
+defconfig=new_defconfig # No need to edit
 fast_path=$GITHUB_WORKSPACE/gki # This where kernelsource saved
 helper=${branch_kernel#*-} # No need to edit
 compile_type=${helper%%-*} # No need to edit
  #USE OWN SOURCE KERNEL
 use_own_kernel=y # y/n 
-link_ur_kernel=https://github.com/deryardi73/kernel_common.git #Must be edited
-branch_ur_kernel=6.6.30 #Must be edited
+link_ur_kernel=https://github.com/deryardi73/gki_kernel.git #Must be edited
+branch_ur_kernel=6.6-lts #Must be edited
 #ksu option
 use_ksu=y
 
@@ -45,8 +45,6 @@ sed -i 's/POST_DEFCONFIG_CMDS="check_defconfig"/POST_DEFCONFIG_CMDS=""/g' build.
 sed -i "s/^DEFCONFIG=.*/DEFCONFIG=$defconfig/" build.config.gki
 #verification defconfig actually wired
 grep "^DEFCONFIG=" build.config.gki
-#disable abi export protection
-sed -i 'd' android/abi_gki_protected_exports_aarch64
 
 git add -A
 git -c user.name="kernel.sh CI" -c user.email="ci@localhost" \
