@@ -27,6 +27,10 @@ sed -i 's/POST_DEFCONFIG_CMDS="check_defconfig"/POST_DEFCONFIG_CMDS=""/g' build.
 sed -i "s/^DEFCONFIG=.*/DEFCONFIG=$defconfig/" build.config.gki
 #verification defconfig actually wired
 grep "^DEFCONFIG=" build.config.gki
+#fix
+sed -i '/#ifdef USE_PKCS11_ENGINE/{N;/static const char \*key_pass;/s/#ifdef USE_PKCS11_ENGINE\n//}' certs/extract-cert.c
+sed -i '/#ifdef USE_PKCS11_ENGINE/{N;/key_pass = getenv/s/#ifdef USE_PKCS11_ENGINE\n//}' certs/extract-cert.c
+sed -i '/^#endif$/{x;/key_pass/d;x}' certs/extract-cert.c
 
 #Compile
 make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out new_defconfig && make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out -j$(nproc --all)
