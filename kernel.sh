@@ -10,7 +10,7 @@ compile_type=${helper%%-*} # No need to edit
  #USE OWN SOURCE KERNEL
 use_own_kernel=y # y/n 
 link_ur_kernel=https://github.com/deryardi73/gki_kernel.git #Must be edited
-branch_ur_kernel=6.6-lts #Must be edited
+branch_ur_kernel=6.6.30 #Must be edited
 #ksu option
 use_ksu=y
 
