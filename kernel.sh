@@ -4,8 +4,8 @@ fast_path=$GITHUB_WORKSPACE/gki # This where kernelsource saved
 helper=${branch_kernel#*-} # No need to edit
 compile_type=${helper%%-*} # No need to edit
  #USE OWN SOURCE KERNEL
-link_ur_kernel=https://github.com/B055n1AN/TigerkittyKernel6.6Redmi12-fire-heat.git #Must be edited
-branch_ur_kernel=main #Must be edited
+link_ur_kernel=https://github.com/deryardi73/gki_kernel.git #Must be edited
+branch_ur_kernel=6.6.30 #Must be edited
 #ksu option
 use_ksu=y
 
@@ -22,4 +22,4 @@ cat $defconfig_path | grep CONFIG_KSU=y
 fi
 
 #Compile
-make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out gki_defconfig && make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out -j$(nproc --all)
+make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out new_defconfig && make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out -j$(nproc --all)
