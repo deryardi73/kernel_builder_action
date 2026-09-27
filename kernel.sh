@@ -22,4 +22,4 @@ cat $defconfig_path | grep CONFIG_KSU=y
 fi
 
 #Compile
-make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out new_defconfig && make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out -j$(nproc --all)
+make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out gki_defconfig && make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out -j$(nproc --all)
