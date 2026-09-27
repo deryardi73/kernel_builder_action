@@ -4,7 +4,7 @@ fast_path=$GITHUB_WORKSPACE/gki # This where kernelsource saved
 helper=${branch_kernel#*-} # No need to edit
 compile_type=${helper%%-*} # No need to edit
  #USE OWN SOURCE KERNEL
-link_ur_kernel=https://github.com/B055n1AN/TigerkittyKernel6.6Redmi12-fire-heat.git#Must be edited
+link_ur_kernel=https://github.com/B055n1AN/TigerkittyKernel6.6Redmi12-fire-heat.git #Must be edited
 branch_ur_kernel=main #Must be edited
 #ksu option
 use_ksu=y
@@ -20,13 +20,6 @@ echo "CONFIG_KSU=y" >> $defconfig_path
 #verification ksu
 cat $defconfig_path | grep CONFIG_KSU=y
 fi
-
-#disable post_defconfig
-sed -i 's/POST_DEFCONFIG_CMDS="check_defconfig"/POST_DEFCONFIG_CMDS=""/g' build.config.gki
-#point the actual Bazel build at our defconfig instead of the stock gki_defconfig
-sed -i "s/^DEFCONFIG=.*/DEFCONFIG=$defconfig/" build.config.gki
-#verification defconfig actually wired
-grep "^DEFCONFIG=" build.config.gki
 
 #Compile
 make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out new_defconfig && make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out -j$(nproc --all)
