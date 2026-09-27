@@ -1,3 +1,6 @@
+#!/bin/sh
+set -eu
+
 #HEAD_CONFIGURATION
 kernelsource=https://android.googlesource.com/kernel/manifest # No need to edit
 kernelname=Galactic #Must be edited
@@ -8,11 +11,15 @@ fast_path=$GITHUB_WORKSPACE/gki # This where kernelsource saved
 helper=${branch_kernel#*-} # No need to edit
 compile_type=${helper%%-*} # No need to edit
  #USE OWN SOURCE KERNEL
-use_own_kernel=y # y/n 
+use_own_kernel=y # y/n
 link_ur_kernel=https://github.com/deryardi73/gki_kernel.git #Must be edited
 branch_ur_kernel=slmk #Must be edited
 #ksu option
 use_ksu=y
+#encore_fas option
+use_encore_fas=y                              # y/n
+encore_fas_setup_url="https://raw.githubusercontent.com/rem01project/encore_fas/main/kernel/scripts/setup.sh"
+encore_fas_pin="896fa70"                       # pinned commit: HEAD (1f35c2f) currently breaks the build, see notes below
 
 mkdir -p gki
 cd $fast_path
@@ -34,6 +41,22 @@ echo "CONFIG_KSU=y" >> $defconfig_path
 cat $defconfig_path | grep CONFIG_KSU=y
 fi
 
+if [ "$use_encore_fas" = "y" ]; then
+#ENCORE_FAS: fetch + integrate the FAS driver into drivers/
+curl -LSs "$encore_fas_setup_url" -o /tmp/encore_fas_setup.sh
+chmod +x /tmp/encore_fas_setup.sh
+
+sh /tmp/encore_fas_setup.sh "$encore_fas_pin"
+
+sed -i 's/depends on ARM64 && UPROBES && ANDROID/depends on ARM64 \&\& UPROBES/' encore_fas/kernel/Kconfig
+
+#ENCORE_FAS ACTIVATION
+grep -q "^CONFIG_UPROBES=y" $defconfig_path || echo "CONFIG_UPROBES=y" >> $defconfig_path
+echo "CONFIG_ENCORE_FAS=y" >> $defconfig_path
+#verification encore_fas
+cat $defconfig_path | grep -E "CONFIG_ENCORE_FAS=y|CONFIG_UPROBES=y"
+fi
+
 if [ "$use_own_kernel" = "n" ]; then
 #Set name for linux kernel
 echo "CONFIG_LOCALVERSION=\"-$kernelname-stable\"" >> $defconfig_path
@@ -47,8 +70,7 @@ sed -i "s/^DEFCONFIG=.*/DEFCONFIG=$defconfig/" build.config.gki
 grep "^DEFCONFIG=" build.config.gki
 
 git add -A
-git -c user.name="kernel.sh CI" -c user.email="ci@localhost" \
-	commit -q -m "ci: bake in KSU + defconfig + build.config tweaks" || true
+git commit -m "ci: bake in KSU + encore_fas + defconfig + build.config tweaks"
 
 #Compile
 cd ../
