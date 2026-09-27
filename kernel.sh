@@ -1,11 +1,11 @@
-defconfig_path=arch/arm64/configs/new_defconfig # No need to edit
-defconfig=new_defconfig # No need to edit
+defconfig_path=arch/arm64/configs/gki_defconfig # No need to edit
+defconfig=gki_defconfig # No need to edit
 fast_path=$GITHUB_WORKSPACE/gki # This where kernelsource saved
 helper=${branch_kernel#*-} # No need to edit
 compile_type=${helper%%-*} # No need to edit
  #USE OWN SOURCE KERNEL
-link_ur_kernel=https://github.com/deryardi73/gki_kernel.git #Must be edited
-branch_ur_kernel=6.6-lts #Must be edited
+link_ur_kernel=https://github.com/B055n1AN/TigerkittyKernel6.6Redmi12-fire-heat.git#Must be edited
+branch_ur_kernel=main #Must be edited
 #ksu option
 use_ksu=y
 
@@ -27,10 +27,6 @@ sed -i 's/POST_DEFCONFIG_CMDS="check_defconfig"/POST_DEFCONFIG_CMDS=""/g' build.
 sed -i "s/^DEFCONFIG=.*/DEFCONFIG=$defconfig/" build.config.gki
 #verification defconfig actually wired
 grep "^DEFCONFIG=" build.config.gki
-#fix
-sed -i '/#ifdef USE_PKCS11_ENGINE/{N;/static const char \*key_pass;/s/#ifdef USE_PKCS11_ENGINE\n//}' certs/extract-cert.c
-sed -i '/#ifdef USE_PKCS11_ENGINE/{N;/key_pass = getenv/s/#ifdef USE_PKCS11_ENGINE\n//}' certs/extract-cert.c
-sed -i '/^#endif$/{x;/key_pass/d;x}' certs/extract-cert.c
 
 #Compile
 make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out new_defconfig && make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out -j$(nproc --all)
