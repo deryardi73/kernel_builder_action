@@ -35,6 +35,7 @@ echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> $defconfig_path
 echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> $defconfig_path
 echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y" >> $defconfig_path
 echo "CONFIG_KSU_SUSFS_ENABLE_LOG=y" >> $defconfig_path
+fi
 
 #Compile
 make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out new_defconfig && make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out -j$(nproc --all)
