@@ -7,5 +7,8 @@ compile_type=${helper%%-*} # No need to edit
 link_ur_kernel=https://github.com/deryardi73/gki_kernel.git #Must be edited
 branch_ur_kernel=base #Must be edited
 
+git clone -b $branch_ur_kernel --depth=1 $link_ur_kernel common
+cd common
+
 #Compile
 make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out new_defconfig && make ARCH=arm64 LLVM=1 LLVM_IAS=1 O=out -j$(nproc --all)
