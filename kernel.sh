@@ -12,7 +12,7 @@ cd $fast_path/$kernelname
 
 #KSU DRIVER
 curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash
-wget https://raw.githubusercontent.com/deryardi73/manual_hook/refs/heads/main/manualhook.patch;wait;patch -p1 < manualhook.patch
+wget https://raw.githubusercontent.com/deryardi73/manual_hook/refs/heads/main/resukisu.patch;wait;patch -p1 < resukisu.patch
 
 #NOMOUNT
 curl https://raw.githubusercontent.com/maxsteeel/nomount/refs/heads/dev/kernel/setup.sh | bash -
