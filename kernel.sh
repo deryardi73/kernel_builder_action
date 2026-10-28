@@ -5,7 +5,7 @@ helper=${branch_kernel#*-} # No need to edit
 compile_type=${helper%%-*} # No need to edit
  #USE OWN SOURCE KERNEL
 link_ur_kernel=https://github.com/deryardi73/gki_kernel.git #Must be edited
-branch_ur_kernel=new_defconfig #Must be edited
+branch_ur_kernel=lts-lru_cast #Must be edited
 #ksu option
 use_ksu=y
 
