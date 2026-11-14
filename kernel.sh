@@ -25,4 +25,6 @@ echo "CONFIG_KSU_MANUAL_HOOK=y" >> $defconfig_path
 
 sed -i 's/(u32)thread->base/(u32)(uintptr_t)thread->base/g' drivers/misc/mediatek/cmdq/bridge/cmdq-bdg-mailbox.c
 
+sed -i 's/(u32)data_64ptr/(u32)(uintptr_t)data_64ptr/; s/(u32)data_8ptr/(u32)(uintptr_t)data_8ptr/' drivers/misc/mediatek/eccci/hif/ccci_hif_dpmaif.c
+
 make O=out ARCH=arm64 $defconfig; printf "Y\n2\n\n\n\nY\n" | make -j$(nproc --all) CC=clang O=out ARCH=arm64 LLVM=1 LLVM_IAS=1 LD=ld.lld AS=llvm-as AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu-
