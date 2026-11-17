@@ -13,7 +13,8 @@ cd $fast_path/$kernelname
 #KSU DRIVER
 wget https://raw.githubusercontent.com/deryardi73/manual_hook/refs/heads/main/susfs.patch;wait;patch -p1 < susfs.patch
 curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash
-wget https://raw.githubusercontent.com/JackA1ltman/NonGKI_Kernel_Build_2nd/refs/heads/mainline/Patches/susfs_inline_hook_patches.sh;wait;./susfs_inline_hook_patches.sh
+wget https://raw.githubusercontent.com/JackA1ltman/NonGKI_Kernel_Build_2nd/refs/heads/mainline/Patches/susfs_inline_hook_patches.sh
+chmod +x susfs_inline_hook_patches.sh && ./susfs_inline_hook_patches.sh
 
 #NOMOUNT
 curl https://raw.githubusercontent.com/maxsteeel/nomount/refs/heads/dev/kernel/setup.sh | bash -
