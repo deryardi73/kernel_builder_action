@@ -34,5 +34,6 @@ echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y" >> $defconfig_path
 echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> $defconfig_path
 echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> $defconfig_path
 echo "CONFIG_KSU_SUSFS_SUS_MAP=y" >> $defconfig_path
+echo "CONFIG_KALLSYMS_ALL=y" >> $defconfig_path
 
 make O=out ARCH=arm64 $defconfig; printf "Y\n2\n\n\n\nY\n" | make -j$(nproc --all) CC=clang O=out ARCH=arm64 LLVM=1 LLVM_IAS=1 LD=ld.lld AS=llvm-as AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu-
