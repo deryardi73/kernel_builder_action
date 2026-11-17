@@ -11,8 +11,9 @@ git clone -b $branch_kernel --depth=1 $kernelsource;wait
 cd $fast_path/$kernelname
 
 #KSU DRIVER
+wget https://raw.githubusercontent.com/deryardi73/manual_hook/refs/heads/main/susfs.patch;wait;patch -p1 < susfs.patch
 curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash
-wget https://raw.githubusercontent.com/deryardi73/manual_hook/refs/heads/main/resukisu.patch;wait;patch -p1 < resukisu.patch
+wget https://raw.githubusercontent.com/JackA1ltman/NonGKI_Kernel_Build_2nd/refs/heads/mainline/Patches/susfs_inline_hook_patches.sh;wait;./susfs_inline_hook_patches.sh
 
 #NOMOUNT
 curl https://raw.githubusercontent.com/maxsteeel/nomount/refs/heads/dev/kernel/setup.sh | bash -
@@ -21,8 +22,16 @@ grep "CONFIG_NOMOUNT" $defconfig_path
 
 #KSU ACTIVATION
 echo "CONFIG_KSU=y" >> $defconfig_path
-echo "CONFIG_KSU_MANUAL_HOOK=y" >> $defconfig_path
-
-sed -i '/^\t*\/\*$/{N;/\n\t* \* Only group with an entry with beacon data/{N;N;N;N;N;d}}' net/wireless/scan.c
+echo "CONFIG_KSU_SUSFS=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_SUS_PATH=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_SUS_MOUNT=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_SUS_KSTAT=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_TRY_UMOUNT=n" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_SPOOF_UNAME=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_ENABLE_LOG=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> $defconfig_path
+echo "CONFIG_KSU_SUSFS_SUS_MAP=y" >> $defconfig_path
 
 make O=out ARCH=arm64 $defconfig; printf "Y\n2\n\n\n\nY\n" | make -j$(nproc --all) CC=clang O=out ARCH=arm64 LLVM=1 LLVM_IAS=1 LD=ld.lld AS=llvm-as AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu-
