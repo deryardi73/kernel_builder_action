@@ -2,6 +2,12 @@ name: Build Kernel
 
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch'
+        required: true
+        default: 'inferno-new'
+        type: string
 
 jobs:
   build:
@@ -35,6 +41,8 @@ jobs:
         run: clang --version
         
       - name: Run Build Script
+        env:
+          KERNEL_BRANCH: ${{ inputs.branch }}
         run: |
           chmod +x kernel.sh
           sh kernel.sh
