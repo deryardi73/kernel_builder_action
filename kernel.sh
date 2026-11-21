@@ -14,7 +14,7 @@ git clone -b $branch_ur_kernel --depth=1 $link_ur_kernel common ;wait
 cd common
 if [ "$use_ksu" = "y" ]; then
 #KSU DRIVER
-curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash;wait
+curl -LSs "https://raw.githubusercontent.com/Baka-SU/BakaSU/refs/heads/main/kernel/setup.sh" | bash
 #KSU ACTIVATION
 echo "CONFIG_KSU=y" >> $defconfig_path
 #verification ksu
